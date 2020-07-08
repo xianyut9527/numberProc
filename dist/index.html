@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>numberProc</title>
+</head>
+<body>
+  <div>demo</div>	
+  <div id="content">
+  	<p></p>
+  	<p></p>
+  	<p></p>
+  	<p></p>
+  	<p></p>
+  </div>
+  <script type="text/javascript" src="./numberProc.min.js"></script>
+  <script type="text/javascript">
+  	let content = document.getElementById('content');
+  	content.children[0].innerHTML = '0.1+0.2= ' + numberProc.add(0.1,0.2) + '&nbsp;&nbsp;&nbsp;&nbsp;原生加法 :' + (0.1+0.2);
+  	content.children[1].innerHTML = '0.7-0.6= ' + numberProc.sub(0.7,0.6) + '&nbsp;&nbsp;&nbsp;&nbsp;原生减法 :' + (0.7-0.6);
+  </script>
+</body>
+</html>
