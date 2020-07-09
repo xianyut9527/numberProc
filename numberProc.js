@@ -12,7 +12,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
  * @Author: jacktian
  * @Date:   2020-07-08 15:01:55
  * @Last Modified by:   jacktian
- * @Last Modified time: 2020-07-08 23:54:12
+ * @Last Modified time: 2020-07-09 22:56:14
  */
 var numberProcess = /*#__PURE__*/function () {
   function numberProcess() {
@@ -142,6 +142,17 @@ var numberProcess = /*#__PURE__*/function () {
     key: "operation",
     value: function operation(str) {
       //乘除加减运算
+      var checkStr = str.search(/[^\d\.\+\-\*\/\(\)]/);
+      var numLength = str.match(/\d+\.?\d*/g).length; //数字长度
+
+      var sybLength = str.match(/[^\d\.]/g).length; //符号长度
+
+      if (checkStr !== -1) {
+        return '语法错误';
+      } else if (numLength !== sybLength + 1) {
+        return '格式错误';
+      }
+
       var syba = str.match(/\d*\.?\d*(\*|\/)\d*\.?\d*/);
       var sybb = str.match(/\d*\.?\d*(\+|\-)\d*\.?\d*/);
       var strLength = str.replace(/\d*\.?\d*/g, '').split('').length;
