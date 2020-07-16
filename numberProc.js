@@ -1,197 +1,130 @@
-"use strict";
-
-function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
-
-function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 /*
  * @Author: jacktian
  * @Date:   2020-07-08 15:01:55
  * @Last Modified by:   jacktian
- * @Last Modified time: 2020-07-09 22:56:14
+ * @Last Modified time: 2020-07-16 18:02:05
  */
-var numberProcess = /*#__PURE__*/function () {
-  function numberProcess() {
-    _classCallCheck(this, numberProcess);
-
-    this.numberVal = ''; //计算字符串
-  }
-
-  _createClass(numberProcess, [{
-    key: "add",
-    value: function add(a, b) {
-      //加法
-      var integerBase = this.baseNum(a, b);
-      var numa = Number(a) * integerBase;
-      var numb = Number(b) * integerBase;
-      var val = (numa + numb) / integerBase;
-      var numVal = this.bigConduct(val);
-      return numVal;
+class numberProcess {
+    constructor() {
+        this.numberVal = ''; //计算字符串
     }
-  }, {
-    key: "sub",
-    value: function sub(a, b) {
-      //减法
-      var integerBase = this.baseNum(a, b);
-      var numa = Number(a) * integerBase;
-      var numb = Number(b) * integerBase;
-      var val = (numa - numb) / integerBase;
-      var numVal = this.bigConduct(val);
-      return numVal;
+    add(a, b) { //加法
+        let integerBase = this.baseNum(a, b);
+        let numa = Number(a) * integerBase;
+        let numb = Number(b) * integerBase;
+        let val = (numa + numb) / integerBase;
+        return this.bigConduct(val)
     }
-  }, {
-    key: "dsub",
-    value: function dsub(a, b) {
-      //除法
-      var integerBase = this.baseNum(a, b);
-      var numa = Number(a) * integerBase;
-      var numb = Number(b) * integerBase;
-      var val = numa / numb;
-      var numVal = this.bigConduct(val);
-      return numVal;
+    sub(a, b) { //减法
+        let integerBase = this.baseNum(a, b);
+        let numa = Number(a) * integerBase;
+        let numb = Number(b) * integerBase;
+        let val = (numa - numb) / integerBase;
+        return this.bigConduct(val);
     }
-  }, {
-    key: "madd",
-    value: function madd(a, b) {
-      //乘法
-      var integerBase = this.baseNum(a, b);
-      var integerBaseb = integerBase + integerBase.toString().replace(/1/, '');
-      var numa = Number(a) * integerBase;
-      var numb = Number(b) * integerBase;
-      var val = numa * numb / integerBaseb;
-      var numVal = this.bigConduct(val);
-      return numVal;
+    dsub(a, b) { //除法
+        let integerBase = this.baseNum(a, b);
+        let numa = Number(a) * integerBase;
+        let numb = Number(b) * integerBase;
+        let val = numa / numb;
+        return this.bigConduct(val);
     }
-  }, {
-    key: "baseNum",
-    value: function baseNum(a, b) {
-      //基数
-      var na = a.toString().split('.');
-      var nb = b.toString().split('.');
-      var lengtha = na[1] ? na[1].length : 0;
-      var lengthb = nb[1] ? nb[1].length : 0;
-      var maxNum = lengtha < lengthb ? lengthb : lengtha;
-      var bs = '1';
-
-      for (var i = 0; i < maxNum; i++) {
-        bs += 0;
-      }
-
-      return Number(bs);
+    madd(a, b) { //乘法
+        let integerBase = this.baseNum(a, b);
+        let integerBaseb = integerBase + (integerBase.toString().replace(/1/, ''));
+        let numa = Number(a) * integerBase;
+        let numb = Number(b) * integerBase;
+        let val = numa * numb / integerBaseb;
+        return this.bigConduct(val);
     }
-  }, {
-    key: "bigConduct",
-    value: function bigConduct(val) {
-      //超过10位小数截取(粗糙解决js大数问题)
-      var valArr = val.toString().split('.');
-      return valArr[1] && valArr[1].length > 10 ? Number(val.toFixed(10)) : val;
+    baseNum(a, b) { //基数
+        let na = a.toString().split('.');
+        let nb = b.toString().split('.');
+        let lengtha = na[1] ? na[1].length : 0;
+        let lengthb = nb[1] ? nb[1].length : 0;
+        let maxNum = lengtha < lengthb ? lengthb : lengtha;
+        let bs = '1';
+        for (let i = 0; i < maxNum; i++) {
+            bs += 0;
+        }
+        return Number(bs);
     }
-  }, {
-    key: "eval",
-    value: function _eval(numStr) {
-      this.numberVal = numStr;
-      return this.sybCompute();
+    bigConduct(val) { //超过10位小数截取(粗糙解决js大数问题)
+        let valArr = val.toString().split('.');
+        return valArr[1] && valArr[1].length > 10 ? Number(val.toFixed(10)) : val;
+    }    
+    eval(numStr) {
+        this.numberVal = numStr?numStr.replace(/\s/g,''):''; //去除空字符串
+        return this.numberVal?this.sybCompute():0;
     }
-  }, {
-    key: "sybCompute",
-    value: function sybCompute() {
-      var _this = this;
-
-      //优先计算符
-      var sybSplit = this.numberVal.match(/(\(\d*\.?\d*((\+|\-|\*|\/)\d*\.?\d*)+\))+/g);
-      var lastNum = 0;
-
-      if (sybSplit) {
-        sybSplit.forEach(function (item, index) {
-          var str = item.replace(/[()]/g, '');
-
-          var num = _this.operation(str);
-
-          var strReg = new RegExp(item.replace(/(\+|\-|\*|\/|\.|\(|\))/g, '\\$1'));
-
-          var val = _this.numberVal.replace(strReg, num);
-
-          if (val.includes('(')) {
-            //有优先计算符循环计算
-            //console.log('---go on ---');
-            lastNum = _this.eval(val);
-          } else {
-            var sybStr = val.replace(/\d*\.?\d*/g, '');
-
-            if (sybStr) {
-              //有运算符继续执行
-              //console.log(val,'---operation go on---');
-              lastNum = _this.operation(val); //console.log(lastNum,'---lastNum1----');
+    sybCompute() { //优先计算符
+        let sybSplit = this.numberVal.match(/(\(\d*\.?\d*((\+|\-|\*|\/)\d*\.?\d*)+\))+/g);
+        let lastNum = 0;
+        if (sybSplit) {
+            sybSplit.forEach((item, index) => {
+                let str = item.replace(/[()]/g, '');
+                let num = this.operation(str);
+                let strReg = new RegExp(item.replace(/(\+|\-|\*|\/|\.|\(|\))/g, '\\$1'));
+                let val = this.numberVal.replace(strReg, num);
+                if (val.includes('(')) { //有优先计算符循环计算
+                    //console.log('---go on ---');
+                    lastNum = this.eval(val);
+                } else {
+                    let sybStr = val.replace(/\d*\.?\d*/g, '')
+                    if (sybStr) { //有运算符继续执行
+                        //console.log(val,'---operation go on---');
+                        lastNum = this.operation(val);
+                        //console.log(lastNum,'---lastNum1----');
+                    } else {
+                        lastNum = Number(val);
+                        //console.log(lastNum,'---back data---');
+                    }
+                }
+            })
+        } else { //普通运算
+            lastNum = this.operation(this.numberVal);
+            //console.log(lastNum,'---lastNum2----');
+        }
+        return lastNum;
+    }
+    operation(str) { //乘除加减运算
+        let checkStr = str.search(/[^\d\.\+\-\*\/\(\)]/);
+        let numLength = str.match(/\d+\.?\d*/g).length; //数字长度
+        let sybLength = str.match(/[^\d\.]/g).length; //符号长度
+        if(checkStr!==-1){
+           return '语法错误';
+        }else if(numLength!==sybLength+1){
+           return '格式错误';
+        }
+        let syba = str.match(/\d*\.?\d*(\*|\/)\d*\.?\d*/);
+        let sybb = str.match(/\d*\.?\d*(\+|\-)\d*\.?\d*/);
+        let strLength = str.replace(/\d*\.?\d*/g, '').split('').length;
+        if (syba) {
+            let arrSplit = syba[0].split(/\*|\//);
+            let backNuma = syba[0].includes('*') ? this.madd(arrSplit[0], arrSplit[1]) : this.dsub(arrSplit[0], arrSplit[1]);
+            if (strLength > 1) {
+                let sybbReg = syba[0].replace(/(\+|\-|\*|\/|\.)/g, '\\$1');
+                let strReg = new RegExp(sybbReg);
+                let strData = str.replace(strReg, backNuma);
+                return this.operation(strData);
             } else {
-              lastNum = Number(val); //console.log(lastNum,'---back data---');
+                //console.log(backNuma,'---last1---');
+                return backNuma;
             }
-          }
-        });
-      } else {
-        //普通运算
-        lastNum = this.operation(this.numberVal); //console.log(lastNum,'---lastNum2----');
-      }
-
-      return lastNum;
-    }
-  }, {
-    key: "operation",
-    value: function operation(str) {
-      //乘除加减运算
-      var checkStr = str.search(/[^\d\.\+\-\*\/\(\)]/);
-      var numLength = str.match(/\d+\.?\d*/g).length; //数字长度
-
-      var sybLength = str.match(/[^\d\.]/g).length; //符号长度
-
-      if (checkStr !== -1) {
-        return '语法错误';
-      } else if (numLength !== sybLength + 1) {
-        return '格式错误';
-      }
-
-      var syba = str.match(/\d*\.?\d*(\*|\/)\d*\.?\d*/);
-      var sybb = str.match(/\d*\.?\d*(\+|\-)\d*\.?\d*/);
-      var strLength = str.replace(/\d*\.?\d*/g, '').split('').length;
-
-      if (syba) {
-        var arrSplit = syba[0].split(/\*|\//);
-        var backNuma = syba[0].includes('*') ? this.madd(arrSplit[0], arrSplit[1]) : this.dsub(arrSplit[0], arrSplit[1]);
-
-        if (strLength > 1) {
-          var sybbReg = syba[0].replace(/(\+|\-|\*|\/|\.)/g, '\\$1');
-          var strReg = new RegExp(sybbReg);
-          var strData = str.replace(strReg, backNuma);
-          return this.operation(strData);
         } else {
-          //console.log(backNuma,'---last1---');
-          return backNuma;
+            let arrSplit = sybb[0].split(/\+|\-/);
+            let backNumb = sybb[0].includes('+') ? this.add(arrSplit[0], arrSplit[1]) : this.sub(arrSplit[0], arrSplit[1]);
+            if (strLength > 1) {
+                let sybbReg = sybb[0].replace(/(\+|\-|\*|\/|\.)/g, '\\$1');
+                let strReg = new RegExp(sybbReg);
+                let strData = str.replace(strReg, backNumb);
+                return this.operation(strData);
+            } else {
+                //console.log(backNumb,'---last2---');
+                return backNumb;
+            }
         }
-      } else {
-        var _arrSplit = sybb[0].split(/\+|\-/);
-
-        var backNumb = sybb[0].includes('+') ? this.add(_arrSplit[0], _arrSplit[1]) : this.sub(_arrSplit[0], _arrSplit[1]);
-
-        if (strLength > 1) {
-          var _sybbReg = sybb[0].replace(/(\+|\-|\*|\/|\.)/g, '\\$1');
-
-          var _strReg = new RegExp(_sybbReg);
-
-          var _strData = str.replace(_strReg, backNumb);
-
-          return this.operation(_strData);
-        } else {
-          //console.log(backNumb,'---last2---');
-          return backNumb;
-        }
-      }
     }
-  }]);
+}
 
-  return numberProcess;
-}();
-
-var numberProc = new numberProcess();
+let numberProc = new numberProcess();
