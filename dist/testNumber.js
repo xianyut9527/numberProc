@@ -1,11 +1,11 @@
+"use strict";
 /*
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
  * @LastEditTime: 2020-11-20 01:39:32
- * @description: 
+ * @description:
  */
-
 // console.time();
 // for (let n = 0; n < 100; n++) {
 //   let arrs = [1234, -1234];
@@ -20,7 +20,6 @@
 // }
 // console.log('---done---')
 // console.timeEnd();
-
 // // import fs from 'fs';
 // // let dataA:string[] = [];
 // // let dataB:string[] = [];
