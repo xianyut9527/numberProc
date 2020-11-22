@@ -1,332 +1,316 @@
 "use strict";
-/*
- * @Author: jackTian
- * @Email: jacktian9527@163.com
- * @Date: 2020-11-16 09:50:33
- * @LastEditTime: 2020-11-20 02:06:09
- * @description:
- */
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 var numberProcs = /** @class */ (function () {
-    function numberProcs(countLength) {
-        if (countLength === void 0) { countLength = 0; }
-        this.countLength = countLength;
-        this.symbolArr = [];
-        this.firstSymbolStr = '';
-        this.uninterrupted = false;
+    function numberProcs() {
+        this.numSymbol = ['', '']; //当前运算数字存在的符号
     }
-    numberProcs.prototype.maxFixed = function (numArr) {
-        //小数位处理
-        var maxNum = 0;
-        for (var l = 0; l < numArr.length; l++) {
-            var fixedVal = numArr[l].toString().split(".")[1];
-            maxNum = fixedVal
-                ? fixedVal.length > maxNum
-                    ? fixedVal.length
-                    : maxNum
-                : maxNum;
-        }
-        return maxNum;
+    /**
+     * @method 字符转长度
+     * @param stra 需要转长度的字符
+     */
+    numberProcs.prototype.strToNum = function (stra) {
+        return stra ? stra.toString().length : 0;
     };
-    numberProcs.prototype.numToFixed = function (numArr, maxNum) {
-        //尾数补齐
-        var numStrArr = [];
-        numArr = numArr.map(function (item, index) {
-            var fixedVal = item.split(".")[1];
-            var fixedValLen = fixedVal ? fixedVal.length : 0;
-            var diffeVal = maxNum - fixedValLen;
-            var lastNum = ""; //尾数补齐
-            if (diffeVal) {
-                for (var i = 0; i < diffeVal; i++) {
-                    lastNum += "0";
-                }
+    /**
+     * @method 数字大小比较
+     * @param numa 当前数字
+     * @param numb 需要比较的数字
+     */
+    numberProcs.prototype.numberMax = function (numa, numb) {
+        numb > numa ? numa = numb : '';
+        return numa;
+    };
+    /**
+     * @method 字符数字处理
+     * @param imte 需要处理的字符/数字
+     * @param index 当前下标
+     */
+    numberProcs.prototype.strNumHandle = function (item, index) {
+        var itemTostr = item.toString();
+        if (itemTostr.includes('-') || Object.is(-0, Number(item)))
+            this.numSymbol[index] = '-';
+        item = itemTostr.replace(/(\+|-|\s)/g, ''); //去除负数符号及空格
+        return item;
+    };
+    /**
+     * @method 空位补零
+     * @param data 需要补零的数据
+     */
+    numberProcs.prototype.pushZero = function () {
+        var _this = this;
+        var data = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            data[_i] = arguments[_i];
+        }
+        var integerLen = 0, decimalsLen = 0; //整数,小数长度
+        this.numSymbol = ['', '']; //符号初始化
+        data.forEach(function (item, index) {
+            item = _this.strNumHandle(item, index);
+            var spltArr = item.split('.'); //当前数字用小数点切分转数组
+            integerLen = _this.numberMax(integerLen, _this.strToNum(spltArr[0]));
+            decimalsLen = _this.numberMax(decimalsLen, _this.strToNum(spltArr[1]));
+        });
+        return data.map(function (item, index) {
+            item = _this.strNumHandle(item, index);
+            var spltArr = item.split('.'); //当前数字用小数点切分转数组
+            var neddNumA = integerLen - _this.strToNum(spltArr[0]); //需要补位的整数
+            var neddNumB = decimalsLen - _this.strToNum(spltArr[1]); //需要补位的小数
+            for (var f = 0; f < neddNumA; f++) {
+                item = '0' + item;
             }
-            item = item.includes(".")
-                ? item + lastNum
-                : item + (lastNum ? "." + lastNum : "");
-            numStrArr.push(item.length);
+            for (var f = 0; f < neddNumB; f++) {
+                item += f === 0 && !item.includes('.') ? '.0' : '0';
+            }
             return item;
         });
-        var setNum = Array.from(new Set(numStrArr));
-        this.countLength = Math.max.apply(Math, setNum); //获取最长length;
-        if (setNum.length > 1) {
-            //整数&小数位数不同则处理
-            var val = setNum[0] - setNum[1];
-            var absVal = Math.abs(val);
-            var activeVal = val < 0 ? numArr[0] : numArr[1];
-            var firstSymbol = "";
-            for (var i = 0; i < absVal; i++) {
-                firstSymbol += "0";
-            }
-            activeVal = firstSymbol + activeVal;
-            val < 0 ? (numArr[0] = activeVal) : (numArr[1] = activeVal);
-        }
-        return numArr;
     };
-    numberProcs.prototype.maxAndMinHandle = function (arrNum) {
-        //安全值处理
-        var arrNumStr = arrNum.join("").replace(/^0*(?=\d+)/g, "");
-        var arrVal = arrNum.includes(".")
-            ? arrNumStr.replace(/(\.?(0*))$/g, "")
-            : arrNumStr; //去除小数点无效字符
-        var numStr = this.firstSymbolStr + (Number(arrVal) ? arrVal : Number(arrVal).toString());
-        var numVal = numStr.replace(/(\+|-)/g, "");
-        var numStrToNum = Number(numVal);
-        return numStrToNum.toString() === numVal ? Number(numStr) : numStr;
-    };
-    numberProcs.prototype.computed = function (numa, numb) {
-        this.firstSymbolStr = ''; //firstSymbol
-        this.symbolArr = ["", ""];
-        numa = numa.toString().replace(/(\s|\(|\))/g, ""); //过滤空白字符及括号
-        numb = numb.toString().replace(/(\s|\(|\))/g, "");
-        this.symbolArr[0] = Number(numa) < 0 ? "-" : "";
-        this.symbolArr[1] = Number(numb) < 0 ? "-" : "";
-        numa = numa.replace(/(\+|-)/g, ""); //过滤符号
-        numb = numb.replace(/(\+|-)/g, "");
-        var arrVal = [numa, numb];
-        var maxNum = this.maxFixed(arrVal); //获取最大小数位
-        var arr = this.numToFixed(arrVal, maxNum); //返回处理过后位数相同的数字
-        return arr;
-    };
-    numberProcs.prototype.paramsHandle = function (data, num, type) {
-        data.splice(0, 2);
-        if (data.length) {
-            if (type === 'add') {
-                data = [num].concat(data);
-                return this.add.apply(this, data);
-            }
-            else {
-                data = [num].concat(data);
-                return this.sub.apply(this, data);
-            }
-        }
-        return num;
+    /**
+     * @method js安全值检测
+     * @param sumNum 检测的数字
+     */
+    numberProcs.prototype.maxNum = function (sumNum) {
+        var numStr = sumNum.join('').replace(/(^0+(?=\d+)|\.0+$|0+(?<=\.\d+)$)/g, ''); //数组转字符并且去除无效字符
+        return Number(numStr).toString() === numStr ? Number(numStr) : 0;
     };
     numberProcs.prototype.add = function () {
         var data = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        var numa = data[0];
-        var numb = data[1];
-        var arr = this.computed(numa, numb); //返回处理后的数组
-        var symBollArr = Array.from(new Set(this.symbolArr));
-        if (!this.uninterrupted && symBollArr.length === 2) {
-            //存在单个负数情况处理
-            this.uninterrupted = true;
-            var num_1 = this.sub(numa, numb);
-            return this.paramsHandle(data, num_1, 'add');
+        if (data.length === 1)
+            return data[0];
+        var computeNum = this.pushZero(data[0], data[1]);
+        var detNum = this.detectionNumber(computeNum, 'add');
+        if (detNum !== 1)
+            return detNum;
+        var numA = computeNum[0], numB = computeNum[1]; //计算数字A/B
+        var numLength = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+        var symbolStr = Array.from(new Set(this.numSymbol));
+        if (symbolStr.length > 1 && !data.includes('abs')) { //负数相反计算
+            return this.sub.apply(this, __spreadArrays(data, ['abs']));
         }
-        this.firstSymbolStr = this.symbolArr[0];
-        if (this.uninterrupted) {
-            this.uninterrupted = false;
-            this.firstSymbolStr = this.symbolArr[0];
-        }
-        var val = 0; //当前位置和
-        var front = 0; //进一位值
-        var arrNum = [];
-        for (var i = this.countLength - 1; i >= 0; i--) {
-            val = Number(arr[0][i]) + Number(arr[1][i]) + front;
-            if (!isNaN(val)) {
-                if (i) { //计算处理
-                    front = parseInt((val / 10).toString());
-                    val = val % 10;
-                }
-                arrNum.unshift(val);
+        /** 加法计算 start **/
+        var sumNum = [], tallyNum = 0; //记账数字
+        for (var n = numLength; n >= 0; n--) {
+            if (!isNaN(Number(numA[n]))) { //数字执行
+                var sum = Number(numA[n]) + Number(numB[n]) + tallyNum;
+                var val = n ? sum % 10 : sum;
+                tallyNum = parseInt((sum / 10).toString());
+                sumNum.unshift(val);
+                continue;
             }
-            else {
-                arrNum.unshift(".");
-            }
+            sumNum.unshift(numA[n]);
         }
-        var num = this.maxAndMinHandle(arrNum);
-        return this.paramsHandle(data, num, 'add');
+        /** 加法计算 end **/
+        data.splice(0, 2); //前2位计算完成后删除
+        if (data.includes('abs')) { //相反执行
+            this.numSymbol[0] ? sumNum.unshift('-') : ''; //如果负数开头则还是负数，负数结尾则负负为正
+            if (data[0] === 'abs')
+                return this.maxNum(sumNum); //没有可计算的值时则返回结果
+            data = data.filter(function (item, index) {
+                return item !== 'abs';
+            });
+            return this.sub.apply(this, __spreadArrays([this.maxNum(sumNum)], data)); //有可计算的值时继续计算
+        }
+        else { //纯加法
+            symbolStr[0] ? sumNum.unshift('-') : '';
+            if (data.length)
+                return this.add.apply(this, __spreadArrays([this.maxNum(sumNum)], data)); //还有没有计算的 继续计算反之返回结果
+            return this.maxNum(sumNum);
+        }
     };
     numberProcs.prototype.sub = function () {
         var data = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        var numa = data[0];
-        var numb = data[1];
-        var arr = this.computed(numa, numb); //返回处理后的数组
-        var symBollArr = Array.from(new Set(this.symbolArr));
-        if (!this.uninterrupted && symBollArr.length === 2) {
-            //存在单个负数情况则相反处理
-            this.uninterrupted = true; //连续状态
-            var num_2 = this.add(numa, numb);
-            return this.paramsHandle(data, num_2, 'sub');
+        if (data.length === 1)
+            return data[0];
+        var computeNum = this.pushZero(data[0], data[1]);
+        var detNum = this.detectionNumber(computeNum, 'sub');
+        if (detNum !== 1)
+            return detNum;
+        var numA = computeNum[0], numB = computeNum[1]; //计算数字A/B
+        var numLength = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+        var symbolStr = Array.from(new Set(this.numSymbol));
+        if (symbolStr.length > 1 && !data.includes('abs')) { //负数相反计算
+            return this.add.apply(this, __spreadArrays(data, ['abs']));
         }
-        var arrNum = [];
-        var val = 0; //当前位置值
-        var front = 0; //进一位值
-        var startNum = "";
-        var endNum = "";
-        if (Number(arr[0]) >= Number(arr[1])) {
-            //正数
-            startNum = arr[0];
-            endNum = arr[1];
-            this.firstSymbolStr = this.symbolArr[0];
-        }
-        else {
-            //负数
-            startNum = arr[1];
-            endNum = arr[0];
-            this.firstSymbolStr = this.symbolArr[0] === '-' ? '' : '-';
-        }
-        if (this.uninterrupted) {
-            this.uninterrupted = false;
-            Number(arr[0]) >= Number(arr[1]) ? this.firstSymbolStr = this.symbolArr[0] : this.firstSymbolStr = this.symbolArr[1];
-        }
-        for (var i = this.countLength - 1; i >= 0; i--) {
-            var num_3 = Number(startNum[i]) - front - Number(endNum[i]);
-            if (!isNaN(num_3)) {
-                //是数字
-                if (num_3 < 0) {
-                    num_3 = Number(startNum[i]) - front + 10 - Number(endNum[i]);
-                    front = 1;
-                }
-                else {
-                    front = 0;
-                }
-                arrNum.unshift(num_3);
+        /** 减法计算 start **/
+        var sumNum = [], tallyNum = 0, posNum = true; //tallyNum记账数字 posNum正数
+        if (Number(numB) > Number(numA))
+            posNum = false;
+        var symlStr = '';
+        for (var n = numLength; n >= 0; n--) {
+            var numberA = posNum ? Number(numA[n]) : Number(numB[n]);
+            var numberB = posNum ? Number(numB[n]) : Number(numA[n]);
+            if (!isNaN(numberA)) { //数字执行
+                if (tallyNum)
+                    tallyNum = 0, numberA -= 1; //借1过后需要减去上一位1
+                numberA < numberB ? tallyNum = 10 : ''; //如果数字不够减则借1
+                var sum = tallyNum + numberA - numberB;
+                sumNum.unshift(sum);
+                !n && !posNum ? symlStr = '-' : '';
+                continue;
             }
-            else {
-                arrNum.unshift(".");
-            }
+            sumNum.unshift(numA[n]);
         }
-        var num = this.maxAndMinHandle(arrNum);
-        return this.paramsHandle(data, num, 'sub');
+        /** 减法计算 end **/
+        data.splice(0, 2); //前2位计算完成后删除
+        //添加运算结果的符号
+        if (data.includes('abs')) { //相反执行
+            if (symlStr) { //内部B大于A
+                if (this.numSymbol[1])
+                    sumNum.unshift('-'); //B小于A
+            }
+            else { //内部A大于B
+                if (this.numSymbol[0])
+                    sumNum.unshift('-'); //A小于B
+            }
+            if (data[0] === 'abs')
+                return this.maxNum(sumNum); //没有可计算的值时则返回结果
+            data = data.filter(function (item, index) {
+                return item !== 'abs';
+            });
+            return this.add.apply(this, __spreadArrays([this.maxNum(sumNum)], data)); //有可计算的值时继续计算
+        }
+        else { //纯减法
+            if (!this.numSymbol[0]) { //2个数字皆为正数
+                symlStr ? sumNum.unshift('-') : ''; //B大于A则返回负数
+            }
+            else { //2个数字皆为负数
+                !symlStr ? sumNum.unshift('-') : ''; //A大于B则返回负数
+            }
+            if (data.length) { //还有值则继续计算
+                return this.sub.apply(this, __spreadArrays([this.maxNum(sumNum)], data));
+            }
+            return this.maxNum(sumNum);
+        }
     };
     numberProcs.prototype.mul = function () {
-        var _this = this;
         var data = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        var numa = data[0];
-        var numb = data[1];
-        var arr = this.computed(numa, numb); //返回处理后的数组
-        var front = 0;
-        var arrData = [];
-        var idxLen = this.countLength - 1;
-        var countA = 0;
-        for (var i = idxLen; i >= 0; i--) {
-            var arrDataChild = [];
-            for (var c = idxLen; c >= 0; c--) {
-                var num_4 = Number(arr[1][i]) * Number(arr[0][c]) + front;
-                if (!isNaN(num_4)) {
-                    //是数字
-                    if (num_4 >= 10 && c) {
-                        front = parseInt((num_4 / 10).toString());
-                        num_4 = num_4 % 10;
-                    }
-                    else {
-                        front = 0;
-                    }
-                    arrDataChild.unshift(num_4);
+        if (data.length === 1)
+            return data[0];
+        var computeNum = this.pushZero(data[0], data[1]);
+        var detNum = this.detectionNumber(computeNum);
+        if (detNum !== 1)
+            return detNum;
+        var numA = computeNum[0], numB = computeNum[1]; //计算数字A/B
+        var numLength = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+        /** 乘法计算 start **/
+        var sumNum = [], fixedNum = 0, mulSum = [], lastZero = ''; //fixedNum小数点几位,mulSum,lastZero补零
+        for (var n = numLength; n >= 0; n--) {
+            var tallyNum = 0; //tallyNum记账数字
+            var itemArr = [];
+            for (var c = numLength; c >= 0; c--) {
+                if (!isNaN(Number(numA[c]))) { //数字执行
+                    var sum = Number(numA[c]) * Number(numB[n]) + tallyNum;
+                    var val = c ? sum % 10 : sum;
+                    tallyNum = parseInt((sum / 10).toString());
+                    var lastVal = val + (c === numLength ? lastZero : '');
+                    !isNaN(Number(numB[n])) ? itemArr.unshift(lastVal) : '';
+                    continue;
+                }
+                else {
+                    fixedNum = (numLength - c) * computeNum.length; //记录小数点位数
                 }
             }
-            if (!isNaN(Number(arr[0][i]))) {
-                if (i !== idxLen) {
-                    //补零
-                    countA++;
-                    for (var f = 0; f < countA; f++) {
-                        arrDataChild.push(0);
-                    }
-                }
-                arrData.push(arrDataChild);
+            if (!isNaN(Number(numB[n]))) { //数字执行
+                mulSum.push(itemArr.join('')); //存入个位乘法结果 
+                lastZero += '0';
             }
         }
-        //值相加则是结果
-        var arrDataVal = 0;
-        arrData.forEach(function (item, index) {
-            var val = item.join("");
-            arrDataVal = _this.add(arrDataVal, val);
-        });
-        var numArr = arrDataVal.toString().split("");
-        /**
-         * 计算和过后 有小数点则还原小数点
-         */
-        var numAStr = arr[0].split(".")[1];
-        var spliceIdxA = numAStr ? numArr.length - numAStr.length * 2 : 0; //初始化下标
-        if (numAStr !== undefined) { //有小数点执行
-            if (spliceIdxA <= 0) {
-                var xsNum = numAStr ? numAStr.length * 2 : 0; //小数位
-                for (var l = 0; l < xsNum; l++) { //零则补位
-                    numArr.unshift("0");
-                }
-                var spliceIdxB = numAStr ? numArr.length - xsNum : 0; //下标
-                numArr.splice(spliceIdxB, 0, ".");
-            }
-            else {
-                numArr.splice(spliceIdxA, 0, ".");
-            }
-        }
-        //end
-        this.firstSymbolStr =
-            Number(numa) < 0 && Number(numb) < 0
-                ? ""
-                : arrDataVal && (Number(numa) < 0 || Number(numb) < 0)
-                    ? "-"
-                    : ""; //有一个负数则为负两个相抵
-        var num = this.maxAndMinHandle(numArr);
-        data.splice(0, 2);
-        if (data.length) {
-            data = [num].concat(data);
-            return this.mul.apply(this, data);
-        }
-        return num;
+        /** 乘法计算 end **/
+        data.splice(0, 2); //前2位计算完成后删除
+        var symbolStr = Array.from(new Set(this.numSymbol));
+        var mulSumNumArr = this.add.apply(this, mulSum).toString().split('');
+        if (fixedNum)
+            mulSumNumArr.splice(-fixedNum, 0, '.'); //小数情况
+        if (symbolStr.length > 1)
+            mulSumNumArr.unshift('-'); //存在单个负数则写入负数符号
+        if (data.length)
+            return this.mul.apply(this, __spreadArrays([this.maxNum(mulSumNumArr)], data)); //还有没计算的继续计算反之返回结果
+        return this.maxNum(mulSumNumArr);
     };
     numberProcs.prototype.div = function () {
         var data = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             data[_i] = arguments[_i];
         }
-        var numa = data[0];
-        var numb = data[1];
-        var arr = this.integerNum(this.computed(numa, numb)); //返回处理后的数组
-        if (!arr[0] && !arr[1])
-            return NaN;
-        if (!arr[1])
-            return Infinity;
-        var arrAstr = arr[0].toString();
-        var numLen = arrAstr.length;
-        var thatVal = arrAstr[0];
-        var lastVal = [];
-        var symStrStatus = numa.toString().includes('.') ? true : numb.toString().includes('.');
-        for (var n = 0; n < numLen; n++) {
-            var val = (Number(thatVal) / Number(arr[1])).toFixed(30);
-            var zs = Number(val.split(".")[0]);
-            var ysStr = val.split(".")[1];
-            var ys = ysStr
-                ? Number((Number("." + ysStr) * Number(arr[1])).toFixed(0))
+        if (data.length === 1)
+            return data[0];
+        var computeNum = this.integerNum(this.pushZero(data[0], data[1]));
+        var detNum = this.detectionNumber(computeNum, 'div');
+        if (detNum !== 1)
+            return detNum;
+        var numA = computeNum[0], numB = computeNum[1]; //计算数字A/B
+        var numLength = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+        /** 除法计算 start **/
+        var sumNum = [], tallyNum = numA[0]; //sumNum和,tallyNum记账数字
+        for (var n = 0; n <= numLength; n++) {
+            var val = (Number(tallyNum) / Number(numB)).toFixed(30);
+            var integerNum = Number(val.split(".")[0]);
+            var remainderStr = val.split(".")[1];
+            var remainder = remainderStr
+                ? Number((Number("." + remainderStr) * Number(numB)).toFixed(0))
                 : 0;
-            thatVal = ys + (arrAstr[n + 1] ? arrAstr[n + 1] : "0");
-            lastVal.push(zs);
-            if (n === numLen - 1 && Number(ysStr)) {
+            tallyNum = remainder + (numA[n + 1] ? numA[n + 1] : "0");
+            sumNum.push(integerNum);
+            if (n === numLength && Number(remainderStr)) {
                 //最后一位还有余数则写入
-                lastVal.push(".");
-                lastVal.push(ysStr.substring(0, 17));
+                sumNum.push(".");
+                sumNum.push(remainderStr.substring(0, 17));
             }
         }
-        this.firstSymbolStr =
-            Number(numa) < 0 && Number(numb) < 0
-                ? ""
-                : Number(numa) < 0 || Number(numb) < 0
-                    ? "-"
-                    : ""; //有一个负数则为负两个相抵
-        var num = this.maxAndMinHandle(lastVal);
-        data.splice(0, 2);
-        if (data.length) {
-            data = [num].concat(data);
-            return this.div.apply(this, data);
-        }
-        return num;
+        /** 除法计算 end **/
+        data.splice(0, 2); //前2位计算完成后删除
+        var symbolStr = Array.from(new Set(this.numSymbol));
+        if (symbolStr.length > 1)
+            sumNum.unshift('-'); //存在单个负数则写入负数符号
+        if (data.length)
+            return this.div.apply(this, __spreadArrays([this.maxNum(sumNum)], data)); //还有没计算的继续计算反之返回结果
+        return this.maxNum(sumNum);
     };
     numberProcs.prototype.integerNum = function (arr) {
         return arr.map(function (item, index) {
             item = item.toString().replace(/\./, '');
             return item;
         });
+    };
+    numberProcs.prototype.detectionNumber = function (data, source) {
+        var val = 1;
+        for (var d = 0; d < data.length; d++) {
+            var items = Number(data[d]);
+            if (!isNaN(items)) { //为数字的话
+                if (source === 'div') { //除法特殊处理
+                    d === 0 && (Object.is(items, Infinity) || Object.is(items, -Infinity)) ? val = Infinity : '';
+                    d === 1 && (Object.is(items, Infinity) || Object.is(items, -Infinity)) && !Object.is(val, Infinity) ? val = 0 : '';
+                }
+                else {
+                    Object.is(items, Infinity) || Object.is(items, -Infinity) ? val = Infinity : '';
+                }
+            }
+            else {
+                val = NaN;
+                break;
+            }
+        }
+        var symbolStr = Array.from(new Set(this.numSymbol));
+        var symStr = source === 'sub' && this.numSymbol[1] ? '' : '-';
+        if (symbolStr.length > 1 && val !== 1)
+            return Number(symStr + val);
+        if (source === 'add' && symbolStr[0] === '-')
+            return Number('-' + val);
+        return val;
     };
     numberProcs.prototype.eval = function (numStr) {
         numStr = numStr.replace(/\s/g, ''); //过滤空字符

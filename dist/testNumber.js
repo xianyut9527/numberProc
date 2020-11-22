@@ -3,33 +3,11 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
- * @LastEditTime: 2020-11-20 01:39:32
+ * @LastEditTime: 2020-11-21 13:11:15
  * @description:
  */
-// console.time();
-// for (let n = 0; n < 100; n++) {
-//   let arrs = [1234, -1234];
-//   let sjsA = parseInt((Math.random() * 2).toString());
-//   let sjsB = parseInt((Math.random() * 2).toString());
-//   let numStrA: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
-//   let numStrB: number = Number((Math.random() * arrs[sjsB]).toFixed(2));
-//   let numStrC: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
-//   let numA = Number(Number(numberProc.div(numStrA, numStrB, numStrC)).toFixed(8));
-//   let numB = Number((Number(Number(numStrA / numStrB).toFixed(10)) / numStrC).toFixed(8));
-//   numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB,numStrC, numA, numB);
-// }
-// console.log('---done---')
-// console.timeEnd();
-// // import fs from 'fs';
-// // let dataA:string[] = [];
-// // let dataB:string[] = [];
-// // for(let i=100; i>=99; i-=0.1){
-// //   for(let c=100; c>=99; c-=0.1){
-// //     let numa = Number(i.toFixed(2));
-// //     let numb = Number(c.toFixed(2));
-// //     let numStr = numa + '*' + numb + '=';
-// //     dataA.push( numStr + (Number((numa + numb).toFixed(10))) + '\n');
-// //     dataB.push( numStr + (Number(Number(numberProc.add(numa,numb)).toFixed(10))) + '\n');
-// //   }
-// // }
-// // console.log(JSON.stringify(dataA)===JSON.stringify(dataB)); //判断执行
+function strAndNum(x) {
+    return x.length;
+}
+var sAN = strAndNum('2');
+console.log(sAN, typeof sAN);

@@ -2,7 +2,7 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
- * @LastEditTime: 2020-11-20 01:39:32
+ * @LastEditTime: 2020-11-21 13:11:15
  * @description: 
  */
 
@@ -34,3 +34,11 @@
 // //   }
 // // }
 // // console.log(JSON.stringify(dataA)===JSON.stringify(dataB)); //判断执行
+
+type strAndNumber = string | number;
+
+function strAndNum(x:strAndNumber):strAndNumber{
+  return (<string>x).length;
+}
+let sAN = strAndNum('2');
+console.log(sAN,typeof sAN);

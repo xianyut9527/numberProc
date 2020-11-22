@@ -1,329 +1,280 @@
 /*
  * @Author: jackTian
  * @Email: jacktian9527@163.com
- * @Date: 2020-11-16 09:50:33
- * @LastEditTime: 2020-11-20 02:06:09
- * @description:
+ * @Date: 2020-11-21 16:19:05
+ * @LastEditTime: 2020-11-22 19:52:38
+ * @description: 
  */
+type numAndStr = number | string;
 class numberProcs {
-  countLength: number; //需要计算的位数
-  symbolArr: string[]; //符号记录
-  uninterrupted: boolean; //连续状态
-  firstSymbolStr: string; //当前符号
-  constructor(countLength = 0) {
-    this.countLength = countLength;
-    this.symbolArr = [];
-    this.firstSymbolStr = '';
-    this.uninterrupted = false;
+  numSymbol: string[] = ['', '']; //当前运算数字存在的符号
+  /**
+   * @method 字符转长度
+   * @param stra 需要转长度的字符
+   */
+  private strToNum(stra: string | undefined): number {
+    return stra ? stra.toString().length : 0;
   }
-  private maxFixed(numArr: string[]) {
-    //小数位处理
-    let maxNum = 0;
-    for (let l = 0; l < numArr.length; l++) {
-      let fixedVal = numArr[l].toString().split(".")[1];
-      maxNum = fixedVal
-        ? fixedVal.length > maxNum
-          ? fixedVal.length
-          : maxNum
-        : maxNum;
-    }
-    return maxNum;
+  /**
+   * @method 数字大小比较
+   * @param numa 当前数字
+   * @param numb 需要比较的数字
+   */
+  private numberMax(numa: number, numb: number): number {
+    numb > numa ? numa = numb : '';
+    return numa;
   }
-  private numToFixed(numArr: string[], maxNum: number) {
-    //尾数补齐
-    let numStrArr: number[] = [];
-    numArr = numArr.map((item, index) => {
-      let fixedVal = item.split(".")[1];
-      let fixedValLen = fixedVal ? fixedVal.length : 0;
-      let diffeVal = maxNum - fixedValLen;
-      let lastNum = ""; //尾数补齐
-      if (diffeVal) {
-        for (let i = 0; i < diffeVal; i++) {
-          lastNum += "0";
-        }
+  /**
+   * @method 字符数字处理
+   * @param imte 需要处理的字符/数字 
+   * @param index 当前下标 
+   */
+  strNumHandle(item: numAndStr, index: number): string { //字符数字处理
+    let itemTostr = item.toString();
+    if (itemTostr.includes('-') || Object.is(-0, Number(item))) this.numSymbol[index] = '-';
+    item = itemTostr.replace(/(\+|-|\s)/g, ''); //去除负数符号及空格
+    return item;
+  }
+  /**
+   * @method 空位补零
+   * @param data 需要补零的数据 
+   */
+  private pushZero(...data: [numAndStr, numAndStr]): string[] { //补位
+    let integerLen: number = 0, decimalsLen: number = 0; //整数,小数长度
+    this.numSymbol = ['', '']; //符号初始化
+    data.forEach((item, index) => { //找出数组中小数和整数最长的length
+      item = this.strNumHandle(item, index);
+      let spltArr: string[] = item.split('.'); //当前数字用小数点切分转数组
+      integerLen = this.numberMax(integerLen, this.strToNum(spltArr[0]));
+      decimalsLen = this.numberMax(decimalsLen, this.strToNum(spltArr[1]));
+    })
+    return data.map((item, index): string => { //补位
+      item = this.strNumHandle(item, index);
+      let spltArr: string[] = item.split('.'); //当前数字用小数点切分转数组
+      let neddNumA = integerLen - this.strToNum(spltArr[0]); //需要补位的整数
+      let neddNumB = decimalsLen - this.strToNum(spltArr[1]); //需要补位的小数
+      for (let f = 0; f < neddNumA; f++) {
+        item = '0' + item;
       }
-      item = item.includes(".")
-        ? item + lastNum
-        : item + (lastNum ? "." + lastNum : "");
-      numStrArr.push(item.length);
-      return item;
-    });
-    let setNum = Array.from(new Set(numStrArr));
-    this.countLength = Math.max(...setNum); //获取最长length;
-    if (setNum.length > 1) {
-      //整数&小数位数不同则处理
-      let val: number = setNum[0] - setNum[1];
-      let absVal: number = Math.abs(val);
-      let activeVal: string =
-        val < 0 ? numArr[0] : numArr[1];
-      let firstSymbol: string = "";
-      for (let i = 0; i < absVal; i++) {
-        firstSymbol += "0";
+      for (let f = 0; f < neddNumB; f++) {
+        item += f === 0 && !item.includes('.') ? '.0' : '0';
       }
-      activeVal = firstSymbol + activeVal;
-      val < 0 ? (numArr[0] = activeVal) : (numArr[1] = activeVal);
-    }
-    return numArr;
+      return (<string>item);
+    })
   }
+  /**
+   * @method js安全值检测
+   * @param sumNum 检测的数字 
+   */
+  maxNum(sumNum: numAndStr[]): numAndStr {
+    let numStr = sumNum.join('').replace(/(^0+(?=\d+)|\.0+$|0+(?<=\.\d+)$)/g, ''); //数组转字符并且去除无效字符
+    return Number(numStr).toString() === numStr ? Number(numStr) : 0;
+  }
+  add(...data: numAndStr[]): numAndStr { //加法
+    if (data.length === 1) return data[0];
+    let computeNum: string[] = this.pushZero(data[0], data[1]);
+    let detNum: number = this.detectionNumber(computeNum, 'add');
+    if (detNum !== 1) return detNum;
+    let [numA, numB]: string[] = computeNum; //计算数字A/B
+    let numLength: number = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+    let symbolStr = Array.from(new Set(this.numSymbol));
+    if (symbolStr.length > 1 && !data.includes('abs')) { //负数相反计算
+      return this.sub(...data, 'abs');
+    }
+    /** 加法计算 start **/
+    let sumNum: numAndStr[] = [], tallyNum: number = 0; //记账数字
+    for (let n = numLength; n >= 0; n--) {
+      if (!isNaN(Number(numA[n]))) { //数字执行
+        let sum: number = Number(numA[n]) + Number(numB[n]) + tallyNum;
+        let val: number = n ? sum % 10 : sum;
+        tallyNum = parseInt((sum / 10).toString());
+        sumNum.unshift(val);
+        continue;
+      }
+      sumNum.unshift(numA[n]);
+    }
+    /** 加法计算 end **/
 
-  private maxAndMinHandle(arrNum: Array<string | number>) {
-    //安全值处理
-    let arrNumStr = arrNum.join("").replace(/^0*(?=\d+)/g, "");
-    let arrVal: string = arrNum.includes(".")
-      ? arrNumStr.replace(/(\.?(0*))$/g, "")
-      : arrNumStr; //去除小数点无效字符
-    let numStr: string =
-      this.firstSymbolStr + (Number(arrVal) ? arrVal : Number(arrVal).toString());
+    data.splice(0, 2); //前2位计算完成后删除
+    if (data.includes('abs')) { //相反执行
+      this.numSymbol[0] ? sumNum.unshift('-') : ''; //如果负数开头则还是负数，负数结尾则负负为正
+      if (data[0] === 'abs') return this.maxNum(sumNum); //没有可计算的值时则返回结果
+      data = data.filter((item, index) => { //过滤
+        return item !== 'abs';
+      })
+      return this.sub(this.maxNum(sumNum), ...data);  //有可计算的值时继续计算
+    } else { //纯加法
+      symbolStr[0] ? sumNum.unshift('-') : '';
+      if (data.length) return this.add(this.maxNum(sumNum), ...data); //还有没有计算的 继续计算反之返回结果
+      return this.maxNum(sumNum);
+    }
+  }
+  sub(...data: numAndStr[]): numAndStr { //减法
+    if (data.length === 1) return data[0];
+    let computeNum: string[] = this.pushZero(data[0], data[1]);
+    let detNum: number = this.detectionNumber(computeNum, 'sub');
+    if (detNum !== 1) return detNum;
+    let [numA, numB]: string[] = computeNum; //计算数字A/B
+    let numLength: number = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
 
-    let numVal = numStr.replace(/(\+|-)/g, "");
-    let numStrToNum = Number(numVal);
-    return numStrToNum.toString() === numVal ? Number(numStr) : numStr;
-  }
-  private computed(
-    numa: number | string,
-    numb: number | string
-  ): string[] {
-    this.firstSymbolStr = ''; //firstSymbol
-    this.symbolArr = ["", ""];
-    numa = numa.toString().replace(/(\s|\(|\))/g,"");  //过滤空白字符及括号
-    numb = numb.toString().replace(/(\s|\(|\))/g,""); 
-    this.symbolArr[0] = Number(numa) < 0 ? "-" : "";
-    this.symbolArr[1] = Number(numb) < 0 ? "-" : "";
-    numa = numa.replace(/(\+|-)/g, "");  //过滤符号
-    numb = numb.replace(/(\+|-)/g, "");
-    let arrVal = [numa, numb];
-    let maxNum = this.maxFixed(arrVal); //获取最大小数位
-    let arr = this.numToFixed(arrVal, maxNum); //返回处理过后位数相同的数字
-    return arr;
-  }
-  paramsHandle(data: Array<string | number>,num:string|number,type:string): number | string { //参数处理
-    data.splice(0, 2);
-    if (data.length) {
-      if(type==='add'){
-        data = [num].concat(data);
-        return this.add(...data);
-      }else{
-        data = [num].concat(data);
-        return this.sub(...data);
-      }
+    let symbolStr = Array.from(new Set(this.numSymbol));
+    if (symbolStr.length > 1 && !data.includes('abs')) { //负数相反计算
+      return this.add(...data, 'abs');
     }
-    return num;
-  }
-  add(...data: Array<string | number>): number | string {
-    let numa = data[0];
-    let numb = data[1];
-    let arr: string[] = this.computed(numa, numb); //返回处理后的数组
-    let symBollArr: string[] = Array.from(new Set(this.symbolArr));
-    if (!this.uninterrupted && symBollArr.length === 2) {
-      //存在单个负数情况处理
-      this.uninterrupted = true;
-      let num = this.sub(numa, numb);
-      return this.paramsHandle(data,num,'add');
-    }
-    this.firstSymbolStr = this.symbolArr[0];
-    if (this.uninterrupted) {
-      this.uninterrupted = false;
-      this.firstSymbolStr = this.symbolArr[0];
-    }
-    let val: number = 0; //当前位置和
-    let front: number = 0; //进一位值
-    let arrNum: Array<string | number> = [];
-    for (let i = this.countLength - 1; i >= 0; i--) {
-      val = Number(arr[0][i]) + Number(arr[1][i]) + front;
-      if (!isNaN(val)) {
-        if (i) { //计算处理
-          front = parseInt((val / 10).toString());
-          val = val % 10;
-        }
-        arrNum.unshift(val);
-      } else {
-        arrNum.unshift(".");
-      }
-    }
-    let num: string | number = this.maxAndMinHandle(arrNum);
 
-    return this.paramsHandle(data,num,'add');
+    /** 减法计算 start **/
+    let sumNum: numAndStr[] = [], tallyNum: number = 0, posNum: boolean = true; //tallyNum记账数字 posNum正数
+    if (Number(numB) > Number(numA)) posNum = false;
+    let symlStr: string = '';
+    for (let n = numLength; n >= 0; n--) {
+      let numberA: number = posNum ? Number(numA[n]) : Number(numB[n]);
+      let numberB: number = posNum ? Number(numB[n]) : Number(numA[n]);
+      if (!isNaN(numberA)) { //数字执行
+        if (tallyNum) tallyNum = 0, numberA -= 1; //借1过后需要减去上一位1
+        numberA < numberB ? tallyNum = 10 : ''; //如果数字不够减则借1
+        let sum: number = tallyNum + numberA - numberB;
+        sumNum.unshift(sum);
+        !n && !posNum ? symlStr = '-' : '';
+        continue
+      }
+      sumNum.unshift(numA[n]);
+    }
+    /** 减法计算 end **/
+    data.splice(0, 2); //前2位计算完成后删除
+    //添加运算结果的符号
+    if (data.includes('abs')) { //相反执行
+      if (symlStr) { //内部B大于A
+        if (this.numSymbol[1]) sumNum.unshift('-'); //B小于A
+      } else {  //内部A大于B
+        if (this.numSymbol[0]) sumNum.unshift('-'); //A小于B
+      }
+      if (data[0] === 'abs') return this.maxNum(sumNum); //没有可计算的值时则返回结果
+      data = data.filter((item, index) => { //过滤
+        return item !== 'abs';
+      })
+      return this.add(this.maxNum(sumNum), ...data);  //有可计算的值时继续计算
+    } else { //纯减法
+      if (!this.numSymbol[0]) { //2个数字皆为正数
+        symlStr ? sumNum.unshift('-') : ''; //B大于A则返回负数
+      } else { //2个数字皆为负数
+        !symlStr ? sumNum.unshift('-') : ''; //A大于B则返回负数
+      }
+      if (data.length) { //还有值则继续计算
+        return this.sub(this.maxNum(sumNum), ...data);
+      }
+      return this.maxNum(sumNum);
+    }
+
   }
-  sub(...data: Array<string | number>): number | string {
-    let numa = data[0];
-    let numb = data[1];
-    let arr: string[] = this.computed(numa, numb); //返回处理后的数组
-    let symBollArr: string[] = Array.from(new Set(this.symbolArr));
-    if (!this.uninterrupted && symBollArr.length === 2) {
-      //存在单个负数情况则相反处理
-      this.uninterrupted = true; //连续状态
-      let num = this.add(numa, numb);
-      return this.paramsHandle(data,num,'sub');
-    }
-    let arrNum: Array<string | number> = [];
-    let val: number = 0; //当前位置值
-    let front: number = 0; //进一位值
-    let startNum: string = "";
-    let endNum: string = "";
-    if (Number(arr[0]) >= Number(arr[1])) {
-      //正数
-      startNum = arr[0];
-      endNum = arr[1];
-      this.firstSymbolStr = this.symbolArr[0];
-    } else {
-      //负数
-      startNum = arr[1];
-      endNum = arr[0];
-      this.firstSymbolStr = this.symbolArr[0] === '-' ? '' : '-';
-    }
-    if (this.uninterrupted) {
-      this.uninterrupted = false;
-      Number(arr[0]) >= Number(arr[1]) ? this.firstSymbolStr = this.symbolArr[0] : this.firstSymbolStr = this.symbolArr[1];
-    }
-    for (let i = this.countLength - 1; i >= 0; i--) {
-      let num = Number(startNum[i]) - front - Number(endNum[i]);
-      if (!isNaN(num)) {
-        //是数字
-        if (num < 0) {
-          num = Number(startNum[i]) - front + 10 - Number(endNum[i]);
-          front = 1;
+  mul(...data: numAndStr[]): numAndStr { //乘法
+    if (data.length === 1) return data[0];
+    let computeNum: string[] = this.pushZero(data[0], data[1]);
+    let detNum: number = this.detectionNumber(computeNum);
+    if (detNum !== 1) return detNum;
+    let [numA, numB]: string[] = computeNum; //计算数字A/B
+    let numLength: number = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+    /** 乘法计算 start **/
+    let sumNum: numAndStr[] = [], fixedNum: number = 0, mulSum: string[] = [], lastZero: string = ''; //fixedNum小数点几位,mulSum,lastZero补零
+    for (let n = numLength; n >= 0; n--) {
+      let tallyNum: number = 0; //tallyNum记账数字
+      let itemArr: numAndStr[] = [];
+      for (let c = numLength; c >= 0; c--) {
+        if (!isNaN(Number(numA[c]))) { //数字执行
+          let sum: number = Number(numA[c]) * Number(numB[n]) + tallyNum;
+          let val: number = c ? sum % 10 : sum;
+          tallyNum = parseInt((sum / 10).toString());
+          let lastVal = val + (c === numLength ? lastZero : '');
+          !isNaN(Number(numB[n])) ? itemArr.unshift(lastVal) : '';
+          continue;
         } else {
-          front = 0;
+          fixedNum = (numLength - c) * computeNum.length; //记录小数点位数
         }
-        arrNum.unshift(num);
-      } else {
-        arrNum.unshift(".");
       }
-    }
-    let num: string | number = this.maxAndMinHandle(arrNum);
+      if (!isNaN(Number(numB[n]))) { //数字执行
+        mulSum.push(itemArr.join('')); //存入个位乘法结果 
+        lastZero += '0';
+      }
 
-    return this.paramsHandle(data,num,'sub');
-  }
-  mul(...data: Array<string | number>): number | string {
-    let numa = data[0];
-    let numb = data[1];
-    let arr: string[] = this.computed(numa, numb); //返回处理后的数组
-    let front: number = 0;
-    let arrData: any[] = [];
-    let idxLen: number = this.countLength - 1;
-    let countA: number = 0;
-    for (let i = idxLen; i >= 0; i--) {
-      let arrDataChild: Array<number | string> = [];
-      for (let c = idxLen; c >= 0; c--) {
-        let num: number | string =
-          Number(arr[1][i]) * Number(arr[0][c]) + front;
-        if (!isNaN(num)) {
-          //是数字
-          if (num >= 10 && c) {
-            front = parseInt((num / 10).toString());
-            num = num % 10;
-          } else {
-            front = 0;
-          }
-          arrDataChild.unshift(num);
-        }
-      }
-      if (!isNaN(Number(arr[0][i]))) {
-        if (i !== idxLen) {
-          //补零
-          countA++;
-          for (let f = 0; f < countA; f++) {
-            arrDataChild.push(0);
-          }
-        }
-        arrData.push(arrDataChild);
-      }
     }
-    //值相加则是结果
-    let arrDataVal: number | string = 0;
-    arrData.forEach((item, index) => {
-      let val: string = item.join("");
-      arrDataVal = this.add(arrDataVal, val);
-    });
-    let numArr: string[] = arrDataVal.toString().split("");
-    /**
-     * 计算和过后 有小数点则还原小数点
-     */
-    let numAStr: string = arr[0].split(".")[1];
-    let spliceIdxA: number = numAStr ? numArr.length - numAStr.length * 2 : 0; //初始化下标
-    if (numAStr !== undefined) { //有小数点执行
-      if (spliceIdxA <= 0) {
-        let xsNum: number = numAStr ? numAStr.length * 2 : 0; //小数位
-        for (let l = 0; l < xsNum; l++) { //零则补位
-          numArr.unshift("0")
-        }
-        let spliceIdxB: number = numAStr ? numArr.length - xsNum : 0; //下标
-        numArr.splice(spliceIdxB, 0, ".");
-      } else {
-        numArr.splice(spliceIdxA, 0, ".");
-      }
-    }
-    //end
-    this.firstSymbolStr =
-      Number(numa) < 0 && Number(numb) < 0
-        ? ""
-        : arrDataVal && (Number(numa) < 0 || Number(numb) < 0)
-          ? "-"
-          : ""; //有一个负数则为负两个相抵
-    let num: string | number = this.maxAndMinHandle(numArr);
+    /** 乘法计算 end **/
 
-    data.splice(0, 2);
-    if (data.length) {
-      data = [num].concat(data);
-      return this.mul(...data);
-    }
-    return num;
+    data.splice(0, 2); //前2位计算完成后删除
+    let symbolStr = Array.from(new Set(this.numSymbol));
+    let mulSumNumArr: string[] = this.add(...mulSum).toString().split('');
+    if (fixedNum) mulSumNumArr.splice(-fixedNum, 0, '.'); //小数情况
+    if (symbolStr.length > 1) mulSumNumArr.unshift('-'); //存在单个负数则写入负数符号
+    if (data.length) return this.mul(this.maxNum(mulSumNumArr), ...data); //还有没计算的继续计算反之返回结果
+    return this.maxNum(mulSumNumArr);
   }
-  div(...data: Array<string | number>): number | string {
-    let numa = data[0];
-    let numb = data[1];
-    let arr = this.integerNum(this.computed(numa, numb)); //返回处理后的数组
-    if (!arr[0] && !arr[1]) return NaN;
-    if (!arr[1]) return Infinity;
-    let arrAstr: string = arr[0].toString();
-    let numLen: number = arrAstr.length;
-    let thatVal: string = arrAstr[0];
-    let lastVal: Array<string | number> = [];
-    let symStrStatus = numa.toString().includes('.')?true:numb.toString().includes('.');
-    for (let n = 0; n < numLen; n++) {
-      let val:string = (Number(thatVal)/Number(arr[1])).toFixed(30);
-      let zs = Number(val.split(".")[0]);
-      let ysStr = val.split(".")[1];
-      let ys = ysStr
-        ? Number((Number("." + ysStr) * Number(arr[1])).toFixed(0))
+  div(...data: numAndStr[]): numAndStr { //除法  ---await update---
+    if (data.length === 1) return data[0];
+    let computeNum: string[] = this.integerNum(this.pushZero(data[0], data[1]));
+    let detNum: number = this.detectionNumber(computeNum, 'div');
+    if (detNum !== 1) return detNum;
+    let [numA, numB]: string[] = computeNum; //计算数字A/B
+    let numLength: number = numA.length - 1; //数组已经补位,数组里每一位数字长度都是一致
+
+    /** 除法计算 start **/
+    let sumNum: numAndStr[] = [], tallyNum: numAndStr = numA[0]; //sumNum和,tallyNum记账数字
+    for (let n = 0; n <= numLength; n++) {
+      let val: string = (Number(tallyNum) / Number(numB)).toFixed(30);
+      let integerNum = Number(val.split(".")[0]);
+      let remainderStr = val.split(".")[1];
+      let remainder = remainderStr
+        ? Number((Number("." + remainderStr) * Number(numB)).toFixed(0))
         : 0;
-      thatVal = ys + (arrAstr[n + 1] ? arrAstr[n + 1] : "0");
-      lastVal.push(zs);
-      if (n === numLen - 1 && Number(ysStr)) {
+      tallyNum = remainder + (numA[n + 1] ? numA[n + 1] : "0");
+      sumNum.push(integerNum);
+      if (n === numLength && Number(remainderStr)) {
         //最后一位还有余数则写入
-        lastVal.push(".");
-        lastVal.push(ysStr.substring(0,17));
+        sumNum.push(".");
+        sumNum.push(remainderStr.substring(0, 17));
       }
     }
-    this.firstSymbolStr =
-      Number(numa) < 0 && Number(numb) < 0
-        ? ""
-        : Number(numa) < 0 || Number(numb) < 0
-          ? "-"
-          : ""; //有一个负数则为负两个相抵
-    let num: string | number = this.maxAndMinHandle(lastVal);
+    /** 除法计算 end **/
 
-    data.splice(0, 2);
-    if (data.length) {
-      data = [num].concat(data);
-      return this.div(...data);
-    }
-    return num;
+    data.splice(0, 2); //前2位计算完成后删除
+    let symbolStr = Array.from(new Set(this.numSymbol));
+    if (symbolStr.length > 1) sumNum.unshift('-'); //存在单个负数则写入负数符号
+    if (data.length) return this.div(this.maxNum(sumNum), ...data); //还有没计算的继续计算反之返回结果
+    return this.maxNum(sumNum);
   }
   private integerNum(
-    arr: Array<number | string>
+    arr: numAndStr[]
   ) { //化整
     return arr.map((item, index) => {
       item = item.toString().replace(/\./, '');
       return item;
     });
   }
-  eval(numStr: string) {
+  detectionNumber(data: string[], source?: string): number { //数字合法检测
+    let val: number = 1;
+    for (let d = 0; d < data.length; d++) {
+      let items = Number(data[d]);
+      if (!isNaN(items)) { //为数字的话
+        if (source === 'div') { //除法特殊处理
+          d === 0 && (Object.is(items, Infinity) || Object.is(items, -Infinity)) ? val = Infinity : '';
+          d === 1 && (Object.is(items, Infinity) || Object.is(items, -Infinity)) && !Object.is(val, Infinity) ? val = 0 : '';
+        } else {
+          Object.is(items, Infinity) || Object.is(items, -Infinity) ? val = Infinity : '';
+        }
+      } else {
+        val = NaN;
+        break;
+      }
+    }
+    let symbolStr: string[] = Array.from(new Set(this.numSymbol));
+    let symStr: string = source === 'sub' && this.numSymbol[1] ? '' : '-';
+    if (symbolStr.length > 1 && val !== 1) return Number(symStr + val);
+    if (source === 'add' && symbolStr[0] === '-') return Number('-' + val);
+    return val;
+  }
+  eval(numStr: string): numAndStr { //混合运算
     numStr = numStr.replace(/\s/g, ''); //过滤空字符
     let val = this.sybCompute(numStr);
     return Number(val).toString() === val ? Number(val) : val;
   }
-  private sybCompute(numStr: string): string { //运算规则
+  private sybCompute(numStr: string): string { //运算规则拆分
     let sybSplit: null | string[] = numStr.match(/\((-?\d+\.?\d*)((\+|-|\*|\/)(-?\d+\.?\d*))+\)/g);
     if (sybSplit) { //括号优先计算
       sybSplit.forEach((item, index) => {
@@ -373,8 +324,4 @@ class numberProcs {
     }
   }
 }
-
 const numberProc = new numberProcs();
-
-
-
