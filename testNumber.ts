@@ -2,24 +2,25 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
- * @LastEditTime: 2020-11-21 13:11:15
+ * @LastEditTime: 2020-11-24 13:29:07
  * @description: 
  */
-
-// console.time();
-// for (let n = 0; n < 100; n++) {
-//   let arrs = [1234, -1234];
-//   let sjsA = parseInt((Math.random() * 2).toString());
-//   let sjsB = parseInt((Math.random() * 2).toString());
-//   let numStrA: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
-//   let numStrB: number = Number((Math.random() * arrs[sjsB]).toFixed(2));
-//   let numStrC: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
-//   let numA = Number(Number(numberProc.div(numStrA, numStrB, numStrC)).toFixed(8));
-//   let numB = Number((Number(Number(numStrA / numStrB).toFixed(10)) / numStrC).toFixed(8));
-//   numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB,numStrC, numA, numB);
-// }
-// console.log('---done---')
-// console.timeEnd();
+import numberProc from "./numberProc-es"
+//测试运算稳定性
+console.time();
+for (let n = 0; n < 10000; n++) {
+  let arrs = [1234, -1234];
+  let sjsA = parseInt((Math.random() * 2).toString());
+  let sjsB = parseInt((Math.random() * 2).toString());
+  let numStrA: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
+  let numStrB: number = Number((Math.random() * arrs[sjsB]).toFixed(2));
+  let numStrC: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
+  let numA = Number(Number(numberProc.add(numStrA, numStrB, numStrC)).toFixed(8));
+  let numB = Number((numStrA + numStrB + numStrC).toFixed(8));
+  numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB,numStrC, numA, numB);
+}
+console.log('---done---')
+console.timeEnd();
 
 // // import fs from 'fs';
 // // let dataA:string[] = [];
@@ -35,10 +36,10 @@
 // // }
 // // console.log(JSON.stringify(dataA)===JSON.stringify(dataB)); //判断执行
 
-type strAndNumber = string | number;
+// type strAndNumber = string | number;
 
-function strAndNum(x:strAndNumber):strAndNumber{
-  return (<string>x).length;
-}
-let sAN = strAndNum('2');
-console.log(sAN,typeof sAN);
+// function strAndNum(x:strAndNumber):strAndNumber{
+//   return (<string>x).length;
+// }
+// let sAN = strAndNum('2');
+// console.log(sAN,typeof sAN);
