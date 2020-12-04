@@ -2,7 +2,7 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
- * @LastEditTime: 2020-11-24 13:29:07
+ * @LastEditTime: 2020-12-04 21:34:05
  * @description: 
  */
 import numberProc from "./numberProc-es"
@@ -15,8 +15,8 @@ for (let n = 0; n < 10000; n++) {
   let numStrA: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
   let numStrB: number = Number((Math.random() * arrs[sjsB]).toFixed(2));
   let numStrC: number = Number((Math.random() * arrs[sjsA]).toFixed(2));
-  let numA = Number(Number(numberProc.add(numStrA, numStrB, numStrC)).toFixed(8));
-  let numB = Number((numStrA + numStrB + numStrC).toFixed(8));
+  let numA = Number(Number(numberProc.eval(`${numStrA}/${numStrB}/${numStrC}`)).toFixed(2));
+  let numB = Number((numStrA / numStrB / numStrC).toFixed(2));
   numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB,numStrC, numA, numB);
 }
 console.log('---done---')

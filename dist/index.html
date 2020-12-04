@@ -2,7 +2,7 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-07-08 23:45:01
- * @LastEditTime: 2020-11-24 12:02:42
+ * @LastEditTime: 2020-12-04 21:20:44
  * @description: 
 -->
 <!DOCTYPE html>
@@ -17,16 +17,19 @@
   	<p></p>
   	<p></p>
   	<p></p>
-  	<p></p>
+		<p></p>
+		<p></p>
   </div>
   <script type="text/javascript" src="./numberProc.js"></script>
-  <script type="text/javascript">
+	<script type="text/javascript">
+	   console.log(numberProc.mul(-550.98,-0,-333.89))
   	let content = document.getElementById('content');
   	content.children[0].innerHTML = '0.1+0.2= ' + numberProc.add(0.1,0.2) + '&nbsp;&nbsp;&nbsp;&nbsp;原生加法 :' + (0.1+0.2);
   	content.children[1].innerHTML = '0.7-0.6= ' + numberProc.sub(0.7,0.6) + '&nbsp;&nbsp;&nbsp;&nbsp;原生减法 :' + (0.7-0.6);
   	content.children[2].innerHTML = '12.2*3= ' + numberProc.mul(12.2,3) + '&nbsp;&nbsp;&nbsp;&nbsp;原生乘法 :' + (12.2*3);  
   	content.children[3].innerHTML = '0.3/0.1= ' + numberProc.div(0.3,0.1) + '&nbsp;&nbsp;&nbsp;&nbsp;原生除法 :' + (0.3/0.1);  
-  	content.children[4].innerHTML = '0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1= ' + numberProc.eval('0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1') + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + (0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1);    	  		
-  </script>
+		content.children[4].innerHTML = '0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1= ' + numberProc.eval('0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1') + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + (0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1);  
+		content.children[5].innerHTML = '9007199254740993+1= ' + numberProc.add('9007199254740993',1) + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + 9007199254740993+1;  	  		
+	</script>
 </body>
 </html>

@@ -246,8 +246,11 @@ var numberProcs = /** @class */ (function () {
         data.splice(0, 2); //前2位计算完成后删除
         var symbolStr = Array.from(new Set(this.numSymbol));
         var mulSumNumArr = this.add.apply(this, mulSum).toString().split('');
-        if (fixedNum)
+        if (fixedNum) {
             mulSumNumArr.splice(-fixedNum, 0, '.'); //小数情况
+            if (fixedNum >= mulSumNumArr.length)
+                mulSumNumArr.unshift('0'); //如果位移超过数字则首位补零
+        }
         if (symbolStr.length > 1)
             mulSumNumArr.unshift('-'); //存在单个负数则写入负数符号
         if (data.length)
@@ -353,6 +356,7 @@ var numberProcs = /** @class */ (function () {
      */
     numberProcs.prototype.sybCompute = function (numStr) {
         var _this = this;
+        numStr = numStr.replace(/\((\d+.?\d*)\)/g, '$1'); //过滤无效包装
         var sybSplit = numStr.match(/\((-?\d+\.?\d*)((\+|-|\*|\/)(-?\d+\.?\d*))+\)/g);
         if (sybSplit) { //括号优先计算
             sybSplit.forEach(function (item, index) {
@@ -401,14 +405,16 @@ var numberProcs = /** @class */ (function () {
      * @param str 运算数据
      */
     numberProcs.prototype.addAndSub = function (str) {
-        var symbolTag = str.match(/(\(?-?\d+\.?\d*\)?)(\+|-)(\(?-?\d+\.?\d*\)?)/);
+        var symbolTag = str.match(/(\(?-?\d+\.?\d*\)?)(\+|-)(\(?(-)?\d+\.?\d*\)?)/);
         if (symbolTag) { //有加减法
-            var item = symbolTag[0];
-            var symBolStr = item.replace(/[^+-]/g, '');
-            var arr = item.split(symBolStr);
+            var item = symbolTag[0], symBolStr_1 = '', transStr = item.replace(/(-?\d+\.?\d*)(\+|-)(-?\d+\.?\d*)/g, function (data, one, two, three) {
+                symBolStr_1 = two;
+                return one + 's' + three; //处理正负数
+            });
+            var arr = transStr.split('s');
             var fliter = item.replace(/(\.|\+|-|\(|\))/g, '\\$1');
             var reg = new RegExp(fliter);
-            var val = symBolStr === '+' ? this.add(arr[0], arr[1]) : this.sub(arr[0], arr[1]);
+            var val = symBolStr_1 === '+' ? this.add(arr[0], arr[1]) : this.sub(arr[0], arr[1]);
             str = str.replace(reg, val.toString());
             return this.addAndSub(str);
         }

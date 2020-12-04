@@ -7,7 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-11-18 15:50:39
- * @LastEditTime: 2020-11-24 13:29:07
+ * @LastEditTime: 2020-12-04 21:34:05
  * @description:
  */
 var numberProc_es_1 = __importDefault(require("./numberProc-es"));
@@ -20,8 +20,8 @@ for (var n = 0; n < 10000; n++) {
     var numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
     var numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
     var numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
-    var numA = Number(Number(numberProc_es_1.default.add(numStrA, numStrB, numStrC)).toFixed(8));
-    var numB = Number((numStrA + numStrB + numStrC).toFixed(8));
+    var numA = Number(Number(numberProc_es_1.default.eval(numStrA + "/" + numStrB + "/" + numStrC)).toFixed(2));
+    var numB = Number((numStrA / numStrB / numStrC).toFixed(2));
     numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
 }
 console.log('---done---');

@@ -1,13 +1,13 @@
 ; (function (GLOBAL: any) {
-  /*
-   * @numberProc.js v0.1.1
-   * @licence MIT Licensed
-   * @Author: jackTian
-   * @Email: jacktian9527@163.com
-   * @Date: 2020-11-21 16:19:05
- * @LastEditTime: 2020-11-24 13:28:14
-   * @description: 
-  */
+/*
+ * @numberProc.js v0.1.1
+ * @licence MIT Licensed
+ * @Author: jackTian
+ * @Email: jacktian9527@163.com
+ * @Date: 2020-11-21 16:19:05
+ * @LastEditTime: 2020-12-04 21:30:51
+ * @description: 
+*/
   type numAndStr = number | string;
   class numberProcs {
     numSymbol: string[] = ['', '']; //当前运算数字存在的符号
@@ -216,7 +216,10 @@
       data.splice(0, 2); //前2位计算完成后删除
       let symbolStr = Array.from(new Set(this.numSymbol));
       let mulSumNumArr: string[] = this.add(...mulSum).toString().split('');
-      if (fixedNum) mulSumNumArr.splice(-fixedNum, 0, '.'); //小数情况
+      if (fixedNum){
+          mulSumNumArr.splice(-fixedNum, 0, '.'); //小数情况
+          if(fixedNum>=mulSumNumArr.length) mulSumNumArr.unshift('0'); //如果位移超过数字则首位补零
+      }
       if (symbolStr.length > 1) mulSumNumArr.unshift('-'); //存在单个负数则写入负数符号
       if (data.length) return this.mul(this.maxNum(mulSumNumArr), ...data); //还有没计算的继续计算反之返回结果
       return this.maxNum(mulSumNumArr);
@@ -311,6 +314,7 @@
      * @param numStr 需要拆分运算的字符
      */
     private sybCompute(numStr: string): string {
+      numStr = numStr.replace(/\((\d+.?\d*)\)/g,'$1'); //过滤无效包装
       let sybSplit: null | string[] = numStr.match(/\((-?\d+\.?\d*)((\+|-|\*|\/)(-?\d+\.?\d*))+\)/g);
       if (sybSplit) { //括号优先计算
         sybSplit.forEach((item, index) => {
@@ -357,11 +361,15 @@
      * @param str 运算数据
      */
     private addAndSub(str: string): string {
-      let symbolTag: null | string[] = str.match(/(\(?-?\d+\.?\d*\)?)(\+|-)(\(?-?\d+\.?\d*\)?)/);
+      let symbolTag: null | string[] = str.match(/(\(?-?\d+\.?\d*\)?)(\+|-)(\(?(-)?\d+\.?\d*\)?)/);
       if (symbolTag) { //有加减法
-        let item = symbolTag[0];
-        let symBolStr = item.replace(/[^+-]/g, '');
-        let arr = item.split(symBolStr);
+        let item = symbolTag[0],
+        symBolStr = '',
+        transStr = item.replace(/(-?\d+\.?\d*)(\+|-)(-?\d+\.?\d*)/g,(data,one,two,three):string=>{
+          symBolStr = two;  
+          return one + 's' + three; //处理正负数
+        });
+        let arr = transStr.split('s');
         let fliter = item.replace(/(\.|\+|-|\(|\))/g, '\\$1');
         let reg = new RegExp(fliter);
         let val = symBolStr === '+' ? this.add(arr[0], arr[1]) : this.sub(arr[0], arr[1]);
