@@ -2,34 +2,129 @@
  * @Author: jackTian
  * @Email: jacktian9527@163.com
  * @Date: 2020-07-08 23:45:01
- * @LastEditTime: 2020-12-04 21:20:44
+ * @LastEditTime: 2020-12-06 01:45:18
  * @description: 
 -->
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>numberProc</title>
 </head>
+
 <body>
-  <div>demo</div>	
-  <div id="content">
-  	<p></p>
-  	<p></p>
-  	<p></p>
-  	<p></p>
+	<div>demo</div>
+	<div id="content">
 		<p></p>
 		<p></p>
-  </div>
-  <script type="text/javascript" src="./numberProc.js"></script>
+		<p></p>
+		<p></p>
+		<p></p>
+		<p></p>
+	</div>
+	<script type="text/javascript" src="./numberProc.js"></script>
 	<script type="text/javascript">
-	   console.log(numberProc.mul(-550.98,-0,-333.89))
-  	let content = document.getElementById('content');
-  	content.children[0].innerHTML = '0.1+0.2= ' + numberProc.add(0.1,0.2) + '&nbsp;&nbsp;&nbsp;&nbsp;原生加法 :' + (0.1+0.2);
-  	content.children[1].innerHTML = '0.7-0.6= ' + numberProc.sub(0.7,0.6) + '&nbsp;&nbsp;&nbsp;&nbsp;原生减法 :' + (0.7-0.6);
-  	content.children[2].innerHTML = '12.2*3= ' + numberProc.mul(12.2,3) + '&nbsp;&nbsp;&nbsp;&nbsp;原生乘法 :' + (12.2*3);  
-  	content.children[3].innerHTML = '0.3/0.1= ' + numberProc.div(0.3,0.1) + '&nbsp;&nbsp;&nbsp;&nbsp;原生除法 :' + (0.3/0.1);  
-		content.children[4].innerHTML = '0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1= ' + numberProc.eval('0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1') + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + (0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1);  
-		content.children[5].innerHTML = '9007199254740993+1= ' + numberProc.add('9007199254740993',1) + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + 9007199254740993+1;  	  		
+		let content = document.getElementById('content');
+		content.children[0].innerHTML = '0.1+0.2= ' + numberProc.add(0.1, 0.2) + '&nbsp;&nbsp;&nbsp;&nbsp;原生加法 :' + (0.1 + 0.2);
+		content.children[1].innerHTML = '0.7-0.6= ' + numberProc.sub(0.7, 0.6) + '&nbsp;&nbsp;&nbsp;&nbsp;原生减法 :' + (0.7 - 0.6);
+		content.children[2].innerHTML = '12.2*3= ' + numberProc.mul(12.2, 3) + '&nbsp;&nbsp;&nbsp;&nbsp;原生乘法 :' + (12.2 * 3);
+		content.children[3].innerHTML = '0.3/0.1= ' + numberProc.div(0.3, 0.1) + '&nbsp;&nbsp;&nbsp;&nbsp;原生除法 :' + (0.3 / 0.1);
+		content.children[4].innerHTML = '0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1= ' + numberProc.eval('0.1+0.2+(0.7-0.6)+12.2*3+0.3/0.1') + '&nbsp;&nbsp;&nbsp;&nbsp;原生混合运算 :' + (0.1 + 0.2 + (0.7 - 0.6) + 12.2 * 3 + 0.3 / 0.1);
+		content.children[5].innerHTML = '9007199254740993+1= ' + numberProc.add('9007199254740993', 1) + '&nbsp;&nbsp;&nbsp;&nbsp;大数原生相加 :' + 9007199254740993 + 1;
+
+
+
+		//测试运算稳定性
+		
+		//testNumber(); 
+    function testNumber(){
+				//加法测试
+				console.log('---加法测试 start---')
+				console.time();
+				for (let n = 0; n < 100; n++) {
+					let arrs = [123456789, -123456789];
+					let sjsA = parseInt((Math.random() * 2).toString());
+					let sjsB = parseInt((Math.random() * 2).toString());
+					let numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
+					let numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numA = numberProc.round(numberProc.add(numStrA, numStrB, numStrC), 2);
+					let numB = (numStrA + numStrB + numStrC).toFixed(2);
+					numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
+				}
+				console.timeEnd();
+				console.log('---加法测试 done---')
+
+				//减法测试
+				console.log('\n---减法测试 start---')
+				console.time();
+				for (let n = 0; n < 100; n++) {
+					let arrs = [123456789, -123456789];
+					let sjsA = parseInt((Math.random() * 2).toString());
+					let sjsB = parseInt((Math.random() * 2).toString());
+					let numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
+					let numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numA = numberProc.round(numberProc.sub(numStrA, numStrB, numStrC), 2);
+					let numB = (numStrA - numStrB - numStrC).toFixed(2);
+					numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
+				}
+				console.timeEnd();
+				console.log('---减法测试 done---')
+
+				//乘法测试
+				console.log('\n---乘法测试 start---')
+				console.time();
+				for (let n = 0; n < 100; n++) {
+					let arrs = [123456, -123456];
+					let sjsA = parseInt((Math.random() * 2).toString());
+					let sjsB = parseInt((Math.random() * 2).toString());
+					let numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
+					let numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numA = numberProc.round(numberProc.mul(numStrA, numStrB, numStrC), 0);
+					let numB = (numStrA * numStrB * numStrC).toFixed(0);
+					Math.abs(Number(numA) - Number(numB)) <= 1 ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
+				}
+				console.timeEnd();
+				console.log('---乘法测试 done---')
+
+				//除法测试
+				console.log('\n---除法测试 start---')
+				console.time();
+				for (let n = 0; n < 100; n++) {
+					let arrs = [123456, -123456];
+					let sjsA = parseInt((Math.random() * 2).toString());
+					let sjsB = parseInt((Math.random() * 2).toString());
+					let numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
+					let numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numA = numberProc.round(numberProc.div(numStrA, numStrB, numStrC), 2);
+					let numB = (numStrA / numStrB / numStrC).toFixed(2);
+					numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
+				}
+				console.timeEnd();
+				console.log('---除法测试 done---')
+
+				//混合运算测试
+
+				console.log('\n---混合测试 start---')
+				console.time();
+				for (let n = 0; n < 100; n++) {
+					let arrs = [123456789, -123456789];
+					let sjsA = parseInt((Math.random() * 2).toString());
+					let sjsB = parseInt((Math.random() * 2).toString());
+					let numStrA = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numStrB = Number((Math.random() * arrs[sjsB]).toFixed(2));
+					let numStrC = Number((Math.random() * arrs[sjsA]).toFixed(2));
+					let numA = numberProc.round(numberProc.eval(`${numStrA}+${numStrB}-${numStrC}*${numStrB}/(${numStrC}+${numStrA})`), 2);
+					let numB = (numStrA + numStrB - numStrC * numStrB / (numStrC + numStrA)).toFixed(2);
+					numA === numB ? '' : console.log('------ERROR------', numStrA, numStrB, numStrC, numA, numB);
+				}
+				console.timeEnd();
+				console.log('---混合测试 done---')
+		}
 	</script>
 </body>
+
 </html>
