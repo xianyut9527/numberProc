@@ -59,8 +59,8 @@ API
 ### 结尾
 
 之前使用的 math.js 作为项目的计算方法库,但我只需要基本的运算处理,而且 math.js 链式操作我个人觉得比较累赘,所以写了个 mini 版且操作友好的运算方法库。
-numberProc 经过超百万次运算测试,已确保稳定性,demo 含有测试脚本
-详情查看[demo](https://github.com/xianyu-tian/numberProc/tree/master/dist "demo")示例；
+numberProc 经过超百万次运算测试,demo 含有测试脚本
+详情查看[demo](https://github.com/xianyu-tian/numberProc/tree/master/dist "demo")。numberProc.js运用到的例子[颜色拾色器](https://github.com/xianyu-tian/colorPicker "颜色拾色器")。
 
 ### License
 
